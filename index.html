@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlacePrep — V2 (Intermediate Web & Mobile)</title>
+  <style>
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --soft: #eceae4;
+      --ink: #14161a;
+      --muted: #5d6470;
+      --line: #dedbd2;
+      --ok-bg: #e3f5ea;
+      --ok-fg: #166534;
+      --warn-bg: #fef3c7;
+      --warn-fg: #92400e;
+      --bad-bg: #fee2e2;
+      --bad-fg: #991b1b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
+    .logo {
+      width: 32px; height: 32px; border-radius: 9px;
+      background: var(--ink); color: #fff;
+      display: grid; place-items: center; font-size: 14px;
+    }
+    .ver { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--soft); padding: 3px 9px; border-radius: 999px; }
+
+    .nav-desktop { display: flex; gap: 6px; }
+    .nav-btn {
+      border: 1px solid transparent; background: transparent; color: var(--muted);
+      padding: 7px 13px; border-radius: 999px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    }
+    .nav-btn.active { background: var(--ink); color: #fff; }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 88px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 15px;
+    }
+    .stat-lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .stat-val { font-size: 26px; font-weight: 800; margin-top: 4px; }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0 14px; }
+    .pill {
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+      padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    }
+    .pill.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+    .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+    .ok { background: var(--ok-bg); color: var(--ok-fg); }
+    .warn { background: var(--warn-bg); color: var(--warn-fg); }
+    .bad { background: var(--bad-bg); color: var(--bad-fg); }
+
+    .tag { display: inline-block; font-size: 11.5px; background: var(--soft); padding: 3px 8px; border-radius: 6px; margin: 6px 4px 0 0; }
+    .meta { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+
+    .btn {
+      border: none; background: var(--ink); color: #fff; padding: 7px 12px;
+      border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    }
+    .btn-lite {
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+      padding: 6px 11px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .task-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; background: var(--surface);
+    }
+    .task-row.done span { text-decoration: line-through; color: var(--muted); }
+
+    .bar-bg { height: 10px; background: var(--soft); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+    .bar-fill { height: 100%; background: var(--ink); width: 33%; transition: width 0.2s; }
+
+    .form-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .form-row input, .form-row select {
+      padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: var(--surface);
+    }
+    .form-row input { flex: 1; min-width: 160px; }
+
+    .nav-mobile {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface); border-top: 1px solid var(--line);
+      padding: 8px 4px; justify-content: space-around; z-index: 40;
+    }
+    .nav-mobile button {
+      border: none; background: transparent; color: var(--muted);
+      font-size: 11px; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 8px;
+    }
+    .nav-mobile button.active { background: var(--soft); color: var(--ink); }
+
+    @media (max-width: 820px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .nav-desktop { display: none; }
+      .nav-mobile { display: flex; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo">P</div>
+      <span>PlacePrep</span>
+      <span class="ver">V2 • Web & Mobile</span>
+    </div>
+    <nav class="nav-desktop">
+      <button class="nav-btn active" onclick="showTab('hub', this)">Hub</button>
+      <button class="nav-btn" onclick="showTab('firms', this)">Firms</button>
+      <button class="nav-btn" onclick="showTab('logs', this)">Senior Logs</button>
+      <button class="nav-btn" onclick="showTab('kit', this)">Prep Kit</button>
+      <button class="nav-btn" onclick="showTab('plan', this)">My Plan</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <!-- 1. HUB -->
+    <section id="tab-hub" class="view active">
+      <div class="card" style="margin-bottom:16px;">
+        <h1 style="font-size:21px;">Placement Preparation Hub</h1>
+        <p class="meta">One place for company eligibility, senior interview notes, study checklists, and weekly tasks—with source labels.</p>
+      </div>
+
+      <div class="grid-4">
+        <div class="card"><div class="stat-lbl">Plan Progress</div><div class="stat-val" id="v2Pct">33%</div></div>
+        <div class="card"><div class="stat-lbl">Firms Listed</div><div class="stat-val">5</div></div>
+        <div class="card"><div class="stat-lbl">Senior Logs</div><div class="stat-val">4</div></div>
+        <div class="card"><div class="stat-lbl">Prep Kit Items</div><div class="stat-val">6</div></div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="badge ok">Verified</span>
+          <h3 style="margin:8px 0 4px;">Nimbus Tech</h3>
+          <p class="meta">Role: Software Engineer • CGPA 7.5+<br>Source: Placement cell notice (12 Nov 2026)</p>
+        </div>
+        <div class="card">
+          <span class="badge warn">Pending verification</span>
+          <h3 style="margin:8px 0 4px;">Orbit Systems</h3>
+          <p class="meta">Drive date rumoured in student chat.<br>Source: Group chat (09 Nov 2026)</p>
+        </div>
+        <div class="card">
+          <span class="badge bad">Outdated</span>
+          <h3 style="margin:8px 0 4px;">Kavach Analytics</h3>
+          <p class="meta">Old cutoff notice from previous drive.<br>Source: Past notice (03 Feb 2026)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. FIRMS -->
+    <section id="tab-firms" class="view">
+      <h2 style="margin-bottom:6px;">Firms Directory</h2>
+      <div class="pill-row">
+        <button class="pill active" onclick="setFirmType('ALL', this)">All Types</button>
+        <button class="pill" onclick="setFirmType('Product', this)">Product</button>
+        <button class="pill" onclick="setFirmType('Service', this)">Service</button>
+        <button class="pill" onclick="setFirmType('Core', this)">Core</button>
+      </div>
+      <div class="pill-row">
+        <span class="meta" style="align-self:center;margin:0;">CGPA Cutoff Filter:</span>
+        <button class="pill active" onclick="setFirmCgpa(10, this)">All</button>
+        <button class="pill" onclick="setFirmCgpa(6.5, this)">6.5+</button>
+        <button class="pill" onclick="setFirmCgpa(7.0, this)">7.0+</button>
+        <button class="pill" onclick="setFirmCgpa(7.5, this)">7.5+</button>
+      </div>
+      <div class="grid-2" id="v2Firms"></div>
+    </section>
+
+    <!-- 3. SENIOR LOGS -->
+    <section id="tab-logs" class="view">
+      <h2 style="margin-bottom:6px;">Senior Interview Logs</h2>
+      <div class="pill-row">
+        <button class="pill active" onclick="setLogRound('ALL', this)">All Rounds</button>
+        <button class="pill" onclick="setLogRound('Aptitude', this)">Aptitude</button>
+        <button class="pill" onclick="setLogRound('Technical', this)">Technical</button>
+        <button class="pill" onclick="setLogRound('HR', this)">HR</button>
+      </div>
+      <div class="grid-2" id="v2Logs"></div>
+    </section>
+
+    <!-- 4. PREP KIT -->
+    <section id="tab-kit" class="view">
+      <h2 style="margin-bottom:6px;">Prep Kit</h2>
+      <div class="pill-row">
+        <button class="pill active" onclick="setKitCat('ALL', this)">All Topics</button>
+        <button class="pill" onclick="setKitCat('Aptitude', this)">Aptitude</button>
+        <button class="pill" onclick="setKitCat('DSA', this)">DSA</button>
+        <button class="pill" onclick="setKitCat('Programming', this)">Programming</button>
+        <button class="pill" onclick="setKitCat('Technical', this)">Technical</button>
+        <button class="pill" onclick="setKitCat('Communication', this)">Communication</button>
+      </div>
+      <div class="grid-3" id="v2Kit"></div>
+    </section>
+
+    <!-- 5. MY PLAN -->
+    <section id="tab-plan" class="view">
+      <div class="grid-2">
+        <div class="card">
+          <div class="stat-lbl">Weekly Completion</div>
+          <div class="stat-val" id="v2PlanPct">33%</div>
+          <div class="bar-bg"><div class="bar-fill" id="v2PlanBar"></div></div>
+          <p class="meta" id="v2PlanCount">1 of 3 tasks done</p>
+          <div class="form-row">
+            <input type="text" id="v2TaskInput" placeholder="Add study task..." />
+            <select id="v2TaskDay">
+              <option>Mon</option><option>Tue</option><option selected>Wed</option><option>Thu</option><option>Fri</option><option>Sat</option>
+            </select>
+            <button class="btn" onclick="addV2Task()">Add</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;">Checklist</h3>
+          <div id="v2Tasks"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="nav-mobile">
+    <button class="active" onclick="showTab('hub', this)">Hub</button>
+    <button onclick="showTab('firms', this)">Firms</button>
+    <button onclick="showTab('logs', this)">Logs</button>
+    <button onclick="showTab('kit', this)">Kit</button>
+    <button onclick="showTab('plan', this)">Plan</button>
+  </nav>
+
+  <script>
+    const firms = [
+      { name: "Nimbus Tech", role: "Software Engineer", type: "Product", cgpa: 7.5, status: "Hiring open", trust: "ok", lbl: "Verified", skills: ["DSA", "OOP", "DBMS"] },
+      { name: "Orbit Systems", role: "Associate Engineer", type: "Service", cgpa: 6.5, status: "Drive date not announced", trust: "warn", lbl: "Pending verification", skills: ["Java", "SQL", "Aptitude"] },
+      { name: "Kavach Analytics", role: "Data Analyst", type: "Product", cgpa: 7.0, status: "No hiring info yet", trust: "bad", lbl: "Outdated", skills: ["SQL", "Python", "Statistics"] },
+      { name: "Zenith Core Works", role: "Graduate Engineer", type: "Core", cgpa: 7.5, status: "No hiring info yet", trust: "warn", lbl: "Pending verification", skills: ["Embedded C", "Electronics"] },
+      { name: "Lumen Software", role: "Software Developer", type: "Product", cgpa: 7.0, status: "Hiring open", trust: "ok", lbl: "Verified", skills: ["C++", "Problem solving"] }
+    ];
+
+    const logs = [
+      { firm: "Nimbus Tech", round: "Technical", trust: "ok", lbl: "Verified", batch: "Batch 26", qs: ["Design a rate limiter", "Explain database indexing"], tip: "Dry-run code before submitting." },
+      { firm: "Orbit Systems", round: "Aptitude", trust: "warn", lbl: "Pending verification", batch: "Batch 25", qs: ["Time and work problems", "Number series"], tip: "Practice timed quant sets." },
+      { firm: "Lumen Software", round: "HR", trust: "bad", lbl: "Outdated", batch: "Batch 24", qs: ["Why this company?", "Project you led"], tip: "Know every line of your resume." },
+      { firm: "Kavach Analytics", round: "Technical", trust: "warn", lbl: "Pending verification", batch: "Batch 25", qs: ["SQL query with joins", "Explain p-value simply"], tip: "Revise joins with small tables." }
+    ];
+
+    const kit = [
+      { title: "Quant Shortcuts", cat: "Aptitude", desc: "Percentages, ratios, and time-work tricks." },
+      { title: "Top 50 DSA Patterns", cat: "DSA", desc: "Sliding window, two pointers, and DP." },
+      { title: "Java and C++ Basics", cat: "Programming", desc: "OOP concepts asked in campus rounds." },
+      { title: "SQL Interview Guide", cat: "Technical", desc: "Joins, grouping, and subqueries." },
+      { title: "OS and DBMS Revision", cat: "Technical", desc: "Scheduling, deadlocks, normalization." },
+      { title: "Group Discussion Tips", cat: "Communication", desc: "Structure points and speak clearly." }
+    ];
+
+    let tasks = [
+      { text: "Finish 2 aptitude sets", day: "Mon", done: false },
+      { text: "Solve 15 array problems", day: "Tue", done: false },
+      { text: "Update resume", day: "Wed", done: true }
+    ];
+
+    let fType = "ALL", fCgpa = 10, lRound = "ALL", kCat = "ALL";
+
+    function showTab(id, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.getElementById("tab-" + id).classList.add("active");
+      document.querySelectorAll(".nav-btn, .nav-mobile button").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+    }
+
+    function renderFirms() {
+      const list = firms.filter(f => (fType === "ALL" || f.type === fType) && (fCgpa === 10 || f.cgpa <= fCgpa));
+      document.getElementById("v2Firms").innerHTML = list.map(f => `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>${f.name}</h3>
+            <span class="badge ${f.trust}">${f.lbl}</span>
+          </div>
+          <p class="meta">${f.role} • ${f.type} • CGPA ${f.cgpa}+<br><strong>Status:</strong> ${f.status}</p>
+          <div>${f.skills.map(s => `<span class="tag">${s}</span>`).join("")}</div>
+        </div>
+      `).join("");
+    }
+
+    function setFirmType(t, el) {
+      fType = t;
+      el.parentElement.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      renderFirms();
+    }
+
+    function setFirmCgpa(c, el) {
+      fCgpa = c;
+      el.parentElement.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      renderFirms();
+    }
+
+    function renderLogs() {
+      const list = logs.filter(l => lRound === "ALL" || l.round === lRound);
+      document.getElementById("v2Logs").innerHTML = list.map(l => `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>${l.firm} — ${l.round}</h3>
+            <span class="badge ${l.trust}">${l.lbl}</span>
+          </div>
+          <p class="meta">Shared by Senior (${l.batch})</p>
+          <ul style="margin:8px 0 8px 18px;font-size:13px;">${l.qs.map(q => `<li>${q}</li>`).join("")}</ul>
+          <p class="meta"><strong>Tip:</strong> ${l.tip}</p>
+        </div>
+      `).join("");
+    }
+
+    function setLogRound(r, el) {
+      lRound = r;
+      el.parentElement.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      renderLogs();
+    }
+
+    function renderKit() {
+      const list = kit.filter(k => kCat === "ALL" || k.cat === kCat);
+      document.getElementById("v2Kit").innerHTML = list.map(k => `
+        <div class="card">
+          <span class="tag">${k.cat}</span>
+          <h3 style="margin:8px 0 4px;">${k.title}</h3>
+          <p class="meta">${k.desc}</p>
+          <div style="margin-top:10px;">
+            <button class="btn-lite" onclick="addKitToPlan('${k.title}')">+ Add to My Plan</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function setKitCat(c, el) {
+      kCat = c;
+      el.parentElement.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      renderKit();
+    }
+
+    function addKitToPlan(title) {
+      tasks.push({ text: "Study: " + title, day: "Thu", done: false });
+      renderTasks();
+      alert('"' + title + '" added to My Plan.');
+    }
+
+    function renderTasks() {
+      const done = tasks.filter(t => t.done).length;
+      const pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+      document.getElementById("v2Pct").textContent = pct + "%";
+      document.getElementById("v2PlanPct").textContent = pct + "%";
+      document.getElementById("v2PlanBar").style.width = pct + "%";
+      document.getElementById("v2PlanCount").textContent = `${done} of ${tasks.length} tasks done`;
+
+      document.getElementById("v2Tasks").innerHTML = tasks.map((t, i) => `
+        <div class="task-row ${t.done ? "done" : ""}">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" ${t.done ? "checked" : ""} onchange="toggleV2Task(${i})" />
+            <span>${t.text}</span>
+          </label>
+          <span class="tag">${t.day}</span>
+        </div>
+      `).join("");
+    }
+
+    function toggleV2Task(i) { tasks[i].done = !tasks[i].done; renderTasks(); }
+
+    function addV2Task() {
+      const inp = document.getElementById("v2TaskInput");
+      const day = document.getElementById("v2TaskDay").value;
+      if (!inp.value.trim()) { alert("Type a task first."); return; }
+      tasks.push({ text: inp.value.trim(), day, done: false });
+      inp.value = "";
+      renderTasks();
+    }
+
+    renderFirms();
+    renderLogs();
+    renderKit();
+    renderTasks();
+  </script>
+</body>
+</html>
